@@ -1,33 +1,47 @@
 const express = require("express");
-const { request } = require("https");
 const app = express();
-app.use(express);
-var net = require("net");
+const net = require("net");
 
-var server = net.createServer();
+// Middleware for parsing JSON
+app.use(express.json());
 
+// Express HTTP Route
 app.get("/", (req, res) => {
-  res.send("Hello this is tcp protocal server");
+  res.send("Hello, this is a TCP protocol server running alongside HTTP!");
 });
+
+// Start Express HTTP Server
+const httpPort = 3000;
+app.listen(httpPort, () => {
+  console.log(`HTTP server running at http://localhost:${httpPort}`);
+});
+
+// TCP Server
+const tcpPort = 9000;
+const server = net.createServer();
 
 server.on("connection", function (socket) {
-  var remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
-  console.log("new client connection is made %s", remoteAddress);
+  const remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
+  console.log("New client connection from %s", remoteAddress);
 
-  socket.on("data", function (d) {
-    console.log("data from %s : %s", remoteAddress, d);
-    socket.write("hello" + d);
+  // Handle incoming data
+  socket.on("data", function (data) {
+    console.log("Data from %s: %s", remoteAddress, data.toString());
+    socket.write("hello " + data);
   });
 
+  // Handle connection close
   socket.once("close", function () {
-    console.log("connection from %s closed", remoteAddress);
+    console.log("Connection from %s closed", remoteAddress);
   });
 
+  // Handle errors
   socket.on("error", function (err) {
-    console.log("connection %s error: %s", remoteAddress, err.message);
+    console.log("Connection error with %s: %s", remoteAddress, err.message);
   });
 });
 
-server.listen(9000, function () {
-  console.log("server listening to %j", server.address());
+// Start TCP Server
+server.listen(tcpPort, () => {
+  console.log(`TCP server listening on port ${tcpPort}`);
 });
