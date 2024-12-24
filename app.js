@@ -1,9 +1,14 @@
 const express = require("express");
+const { request } = require("https");
 const app = express();
 app.use(express);
 var net = require("net");
 
 var server = net.createServer();
+
+app.get("/", (req, res) => {
+  res.send("Hello this is tcp protocal server");
+});
 
 server.on("connection", function (socket) {
   var remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
